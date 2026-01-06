@@ -19,10 +19,11 @@ class UltralyticsDetectionModel(DetectionModel):
     Supports both PyTorch (.pt) and ONNX (.onnx) models.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, FL_args = None, *args, **kwargs):
         self.fuse: bool = kwargs.pop("fuse", False)
         existing_packages = getattr(self, "required_packages", None) or []
         self.required_packages = [*list(existing_packages), "ultralytics"]
+        self.FL_args = FL_args
         super().__init__(*args, **kwargs)
 
     def load_model(self):
@@ -81,6 +82,9 @@ class UltralyticsDetectionModel(DetectionModel):
 
         if self.image_size is not None:
             kwargs = {"imgsz": self.image_size, **kwargs}
+        
+        if self.FL_args is not None:
+            kwargs.update(self.FL_args)
 
         prediction_result = self.model(image[:, :, ::-1], **kwargs)  # YOLO expects numpy arrays to have BGR
 
